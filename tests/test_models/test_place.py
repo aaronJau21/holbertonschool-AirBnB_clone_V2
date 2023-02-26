@@ -4,7 +4,7 @@
 import unittest
 import models
 
-class_path = models.base_model.Place
+class_path = models.place.Place
 
 
 class Test_Place(unittest.TestCase):
@@ -58,9 +58,9 @@ class Test_Place(unittest.TestCase):
         """Testing Place's longitude attribute value"""
         self.assertIs(type(class_path.longitude), float)
 
-    def test_amenities_attribute(self):
-        """Testing Place's amenities attribute value"""
-        self.assertIs(type(class_path.amenities), list)
+    def test_amenity_id_attribute(self):
+        """Testing Place's amenity_id attribute value"""
+        self.assertIs(type(class_path.amenity_id), list)
 
 
 if __name__ == '__main__':

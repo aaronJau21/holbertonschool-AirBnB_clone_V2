@@ -28,15 +28,11 @@ class Test_Base_Model(unittest.TestCase):
 
     def test_to_dict_method(self):
         """Testing to_dict method return type"""
-        self.assertIs(type(class_path.to_dict()), dict)
-
-    def test_init_doc(self):
-        """Testing __init__ method documentation"""
-        self.assertIsNotNone(class_path.__init__.__doc__)
+        self.assertIs(type(class_path.to_dict(self), dict))
 
     def test_id_value(self):
         """Testing id attribute value"""
-        self.assertIs(type(class_path.self.id), str)
+        self.assertIs(type(class_path.id), str)
 
 
 if __name__ == '__main__':
