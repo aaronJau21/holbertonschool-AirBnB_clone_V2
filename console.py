@@ -17,6 +17,54 @@ class HBNBCommand(cmd.Cmd):
     intro = "\o/  Welcome to HBNB command line  \o/"
     prompt = "(hbnb) "
 
+    @staticmethod
+    def parse(line):
+        """ Parse the command line into argumentss """
+        args = []
+        quote_mode = False
+        arg_start = 0
+
+        for i, c in enumerate(line):
+            if c == '"':
+                quote_mode = not quote_mode
+            elif not quote_mode and c.isspace():
+                if arg_start < i:
+                    args.append(line[arg_start:i])
+                arg_start = i + 1
+
+        if arg_start < len(line):
+            args.append(line[arg_start:])
+
+        return [arg.strip('"') for arg in args]
+
+    @staticmethod
+    def validate_args(args, number_of_validations=2):
+        if len(args) == 0:
+            print("** class name missing **")
+            return False
+
+        if args[0] not in classes:
+            print("** class doesn't exist **")
+            return False
+
+        if number_of_validations >= 3 and len(args) == 1:
+            print("** instance id missing **")
+            return False
+
+        if number_of_validations >= 4 and len(args) == 1:
+            print("** attribute name missing **")
+            return False
+
+        if number_of_validations >= 5 and len(args) == 1:
+            print("** value missing **")
+            return False
+
+        return True
+
+    @staticmethod
+    def get_key(class_name, id):
+        return f"{class_name}.{id}"
+
     def do_quit(self, line):
         """ Exit the program """
 
@@ -36,15 +84,13 @@ class HBNBCommand(cmd.Cmd):
     def do_create(self, line):
         """ Create a new instance of BaseModel """
 
-        argument = line.split()
-        if len(argument) == 0:
-            print("** class name missing **")
-        elif argument[0] not in classes:
-            print("** class doesn't exist **")
-        else:
-            instance = classes[argument[0]]()
-            instance.save()
-            print(instance.id)
+        arguments = self.parse(line)
+        if not self.validate_args(arguments):
+            return
+
+        instance = classes[arguments[0]]()
+        instance.save()
+        print(instance.id)
 
     def do_show(self, line):
         """
@@ -52,39 +98,34 @@ class HBNBCommand(cmd.Cmd):
         on the class name and id
         """
 
-        argument = line.split()
-        call_storage = storage.all()
-        if len(argument) == 0:
-            print("** class name missing **")
-        elif argument[0] not in classes:
-            print("** class doesn't exist **")
-        elif len(argument) == 1:
-            print("** instance id missing **")
+        arguments = self.parse(line)
+        if not self.validate_args(arguments, 3):
+            return
+
+        all_objects = storage.all()
+
+        key = self.get_key(arguments[0], arguments[1])
+        if key in all_objects:
+            print(all_objects[key])
         else:
-            key = "{}.{}".format(argument[0], argument[1])
-            if key in call_storage:
-                print(call_storage[key])
-            else:
-                print("** no instance found **")
+            print("** no instance found **")
 
     def do_destroy(self, line):
         """ Deletes an instance based on the class name and id """
 
-        argument = line.split()
-        call_storage = storage.all()
-        if len(argument) == 0:
-            print("** class name missing **")
-        elif argument[0] not in classes:
-            print("** class doesn't exist **")
-        elif len(argument) == 1:
-            print("** instance id missing **")
+        arguments = self.parse(line)
+
+        if not self.validate_args(arguments, 3):
+            return
+
+        all_objects = storage.all()
+        key = self.get_key(arguments[0], arguments[1])
+
+        if key not in all_objects:
+            print("** no instance found **")
         else:
-            key = "{}.{}".format(argument[0], argument[1])
-            if key not in call_storage:
-                print("** no instance found **")
-            else:
-                del call_storage[key]
-                storage.save()
+            del all_objects[key]
+            storage.save()
 
     def do_all(self, line):
         """
@@ -92,15 +133,16 @@ class HBNBCommand(cmd.Cmd):
         the class name
         """
 
-        argument = line.split()
-        all_storage = storage.all()
-        if len(argument) == 0:
-            print(all_storage)
+        arguments = self.parse(line)
+        all_objects = storage.all()
+
+        if len(arguments) == 0:
+            print([str(str_rep) for str_rep in all_objects.values()])
+        elif arguments[0] not in classes:
+            print("** class doesn't exist **")
         else:
-            if argument[0] not in classes:
-                print("** class doesn't exist **")
-            else:
-                print(all_storage)
+            print([str(obj) for obj in all_objects.values()
+                   if type(obj).__name__ == arguments[0]])
 
     def do_update(self, line):
         """
@@ -108,30 +150,18 @@ class HBNBCommand(cmd.Cmd):
         updating attribute
         """
 
-        argument = line.split()
-        all_objects = storage.all()
-        if len(argument) == 0:
-            print("** class name missing **")
-            return
-        elif argument[0] not in classes:
-            print("** class doesn't exist **")
-            return
-        elif len(argument) == 1:
-            print("** instance id missing **")
-            return
-        elif len(argument) == 2:
-            print("** attribute name missing **")
-            return
-        elif len(argument) == 3:
-            print("** value missing **")
+        arguments = self.parse(line)
+        if not self.validate_args(arguments, 5):
             return
 
-        key = "{}.{}".format(argument[0], argument[1])
+        all_objects = storage.all()
+
+        key = self.get_key(arguments[0], arguments[1])
         if key not in all_objects:
             print("** no instance found **")
             return
 
-        setattr(all_objects[key], argument[2], argument[3])
+        setattr(all_objects[key], arguments[2], arguments[3])
         all_objects[key].save()
 
 
