@@ -71,3 +71,4 @@ class FileStorage:
     def close(self):
         """method to reload"""
         self.reload()
+# HAol
