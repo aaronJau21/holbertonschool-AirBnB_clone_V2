@@ -19,7 +19,7 @@ class FileStorage:
         return FileStorage.__objects
 
     def delete(self, obj=None):
-        """Deletes an object from the dictionary"""
+        """THIS FUNCTION FUCKING DELETE"""
         if obj:
             for key, value in FileStorage.__objects.items():
                 if value == obj:
@@ -61,13 +61,13 @@ class FileStorage:
                    "Review": Review}
         try:
             with open(self.__file_path, 'r', encoding='UTF-8') as file:
-                js = json.load(file)
-            for key, value in js.items():
-                reloadobj = classes[js[key]["__class__"]](**js[key])
-                self.__objects[key] = reloadobj
+                temp = json.load(file)
+            for key, value in temp.items():
+                reloaded = classes[temp[key]["__class__"]](**temp[key])
+                self.__objects[key] = reloaded
         except FileNotFoundError:
             pass
 
     def close(self):
-        """method to reload"""
+        """deserializing the JSON file to objects"""
         self.reload()
